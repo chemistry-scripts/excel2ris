@@ -160,7 +160,7 @@ class BibItem:
         # --- 5 --- Others
         elif value == "Computer Program":
             self.__type = "COMP"
-        elif value == "CSD Private Communication"
+        elif value == "CSD Private Communication":
             self.__type = "GEN"
             self.__keywords.append("CSD Private Communication")
         elif value == "Conference Organization":
