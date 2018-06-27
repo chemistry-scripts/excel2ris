@@ -61,16 +61,21 @@ def get_input_arguments() -> dict:
 
     parser.add_argument('-i', '--input_file', type=str, nargs=1,
                         help='Tab-separated file containing the crude data')
-    # parser.add_argument('-d', '--data', type=str, nargs='+',
-    #                     help='List of data to extract')
+    parser.add_argument('-o', '--output_file', type=str, nargs=1,
+                        help='Output-file in which to store the extracted data')
+    parser.add_argument('-d', '--data_type', type=str, nargs='1',
+                        help='Type of data to extract, within: ScientificProduction,' +
+                        'Conferences, Grants, Dissemination and Others')
     try:
         args = parser.parse_args()
     except argparse.ArgumentError as error:
         logger.error(str(error))
         sys.exit(2)
 
-    input_data = dict.fromkeys(['input_file'])
+    input_data = dict.fromkeys(['input_file', 'output_file', 'data_type'])
     input_data['input_file'] = args.input_file
+    input_data['output_file'] = args.output_file
+    input_data['data_type'] = args.data_type
     return input_data
 
 
@@ -89,7 +94,7 @@ def parse_csv(input_file):
         # Read lines
         for row in reader:
             bib_item = BibItem()
-            #TODO: Switch filling according to file type
+            #TODO: Switch according to input file type
             bib_item.type = row['Type']
             bibliography.append(bib_item)
 
