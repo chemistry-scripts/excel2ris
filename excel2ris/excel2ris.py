@@ -19,24 +19,6 @@ def main():
     # Retrieve command-line args
     args = get_input_arguments()
 
-    # Parse input file
-    bibliography = parse_csv(args['input_file'])
-
-    # Create RIS format for every bibliography entry
-    ris_entries = [bib.to_ris() for bib in bibliography]
-
-    # Print the whole thing to a global RIS file
-    write_ris(args['output_file'], ris_entries)
-
-
-def write_ris(output_file, ris_entries):
-    """Write all RIS entries to output file"""
-    with open(output_file, mode='w', encoding='UTF-8') as out:
-        for entry in ris_entries:
-            out.write('\n'.join(entry))
-            out.write('\n\n')
-    return
-
 
 def setup_logger():
     """Setup logger"""
@@ -50,7 +32,6 @@ def setup_logger():
     stream_handler.setFormatter(formatter)
 
     logger.addHandler(stream_handler)
-    return
 
 
 def get_input_arguments() -> dict:
@@ -74,24 +55,22 @@ def get_input_arguments() -> dict:
     return input_data
 
 
-def parse_csv(input_file):
+def csv_parser(input_file):
     """Parse tab-separated csv file exported from Excel"""
 
     # Blank bibliography
     bibliography = []
 
-    with open(input_file, mode='r') as input:
-        # Setup reader
-        reader = csv.reader(input, csv.excel_tab)
-        # Ignore header
-        reader.next()
+    # Setup reader
+    reader = csv.reader(input_file, csv.excel_tab)
+    # Ignore header
+    reader.next()
 
-        # Read lines
-        for row in reader:
-            bib_item = BibItem()
-            #TODO: Switch filling according to file type
-            bib_item.type = row['Type']
-            bibliography.append(bib_item)
+    # Read lines
+    for line in reader.next():
+        bib_item = BibItem()
+        bib_item.type = line['Type']
+        bibliography.append(bib_item)
 
     return bibliography
 
