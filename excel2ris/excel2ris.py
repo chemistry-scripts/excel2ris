@@ -20,7 +20,7 @@ def main():
     args = get_input_arguments()
 
     # Parse input file
-    bibliography = parse_csv(args['input_file'])
+    bibliography = parse_csv(args['input_file'], args['data_type'])
 
     # Create RIS format for every bibliography entry
     ris_entries = [bib.to_ris() for bib in bibliography]
@@ -79,23 +79,62 @@ def get_input_arguments() -> dict:
     return input_data
 
 
-def parse_csv(input_file):
+def parse_csv(input_file, data_type):
     """Parse tab-separated csv file exported from Excel"""
-
+    logger = logging.getLogger()
     # Blank bibliography
     bibliography = []
 
-    with open(input_file, mode='r') as input:
+    with open(input_file, mode='r') as in_file:
         # Setup reader
-        reader = csv.reader(input, csv.excel_tab)
+        reader = csv.reader(in_file, csv.excel_tab)
         # Ignore header
         reader.next()
-
         # Read lines
         for row in reader:
+            logger.debug(row)
             bib_item = BibItem()
-            #TODO: Switch according to input file type
-            bib_item.type = row['Type']
+            if data_type == 'ScientificProduction':
+                bib_item.type = row[0]
+                bib_item.title = row[1]
+                bib_item.authors = row[2]
+                bib_item.year = row[3]
+                if row[4]:
+                    bib_item.number = row[4]
+                bib_item.institution = row[5]
+            elif data_type == 'Conferences':
+                bib_item.type = row[0]
+                bib_item.title = row[1]
+                bib_item.conference_name = row[2]
+                bib_item.location = row[3]
+                bib_item.authors = row[4]
+                bib_item.year = row[5]
+                bib_item.month = row[6]
+            elif data_type == 'Grants':
+                bib_item.type = row[0]
+                bib_item.title = row[1]
+                bib_item.authors = row[2]
+                bib_item.keywords = row[3]
+                bib_item.year = row[4]
+                bib_item.number = row[5]
+                bib_item.institution = row[6]
+            elif data_type == 'Dissemination':
+                bib_item.type = row[0]
+                bib_item.title = row[1]
+                bib_item.authors = row[2]
+                bib_item.year = row[3]
+                bib_item.location = row[4]
+                bib_item.comments = row[5]
+            elif data_type == 'Others':
+                bib_item.type = row[0]
+                bib_item.title = row[1]
+                bib_item.authors = row[2]
+                bib_item.year = row[3]
+                bib_item.location = row[4]
+                bib_item.comments = row[5]
+            else:
+                logger.error('Unrecognized file type')
+                sys.exit(2)
             bibliography.append(bib_item)
 
     return bibliography
@@ -110,9 +149,71 @@ class BibItem:
         """Build the object"""
         self.__type = ""
         self.__authors = list()
+        self.__title = ""
         self.__year = int()
         self.__keywords = list()
-        
+        self.__number = ""
+        self.__institution = ""
+        self.__conference_name = ""
+        self.__location = ""
+        self.__comments = list()
+
+    @property
+    def comments(self):
+        return self.__comments
+
+    @comments.setter
+    def comments(self, value):
+        self.__comments.append(value)
+
+    @property
+    def keywords(self):
+        return self.__keywords
+
+    @keywords.setter
+    def keywords(self, value):
+        self.__keywords.append(value)
+
+    @property
+    def conference_name(self):
+        return self.__conference_name
+
+    @conference_name.setter
+    def conference_name(self, value):
+        self.__conference_name = value
+
+    @property
+    def location(self):
+        return self.__location
+
+    @location.setter
+    def location(self, value):
+        self.__location = value
+
+    @property
+    def institution(self):
+        return self.__institution
+
+    @institution.setter
+    def institution(self, value):
+        self.__institution = value
+
+    @property
+    def number(self):
+        return self.__number
+
+    @number.setter
+    def number(self, value):
+        self.__number = value
+
+    @property
+    def title(self):
+        return self.__title
+
+    @title.setter
+    def title(self, value):
+        self.__title = value
+
     @property
     def type(self):
         return self.__type
@@ -207,7 +308,7 @@ class BibItem:
 
     @authors.setter
     def authors(self, value):
-        self.__authors = value
+        self.__authors.append(value)
 
     @property
     def year(self):
