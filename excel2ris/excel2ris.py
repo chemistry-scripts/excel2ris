@@ -33,8 +33,7 @@ def write_ris(output_file, ris_entries):
     """Write all RIS entries to output file"""
     with open(output_file, mode='w', encoding='UTF-8') as out:
         for entry in ris_entries:
-            out.write('\n'.join(entry))
-            out.write('\n\n')
+            print(entry)
     return
 
 
@@ -53,7 +52,7 @@ def setup_logger():
     return
 
 
-def get_input_arguments() -> dict:
+def get_input_arguments():
     """Parse command line"""
     logger = logging.getLogger()
     parser = argparse.ArgumentParser()
@@ -63,9 +62,8 @@ def get_input_arguments() -> dict:
                         help='Tab-separated file containing the crude data')
     parser.add_argument('-o', '--output_file', type=str, nargs=1,
                         help='Output-file in which to store the extracted data')
-    parser.add_argument('-d', '--data_type', type=str, nargs='1',
-                        help='Type of data to extract, within: ScientificProduction,' +
-                        'Conferences, Grants, Dissemination and Others')
+    parser.add_argument('-d', '--data_type', type=str, nargs=1,
+                        help="ScientificProduction, Conferences, Grants, Dissemination and Others")
     try:
         args = parser.parse_args()
     except argparse.ArgumentError as error:
@@ -73,9 +71,21 @@ def get_input_arguments() -> dict:
         sys.exit(2)
 
     input_data = dict.fromkeys(['input_file', 'output_file', 'data_type'])
-    input_data['input_file'] = args.input_file
-    input_data['output_file'] = args.output_file
-    input_data['data_type'] = args.data_type
+    if args.input_file:
+        input_data['input_file'] = args.input_file[0]
+    else:
+        logger.error("No input file")
+        sys.exit(2)
+    if args.output_file:
+        input_data['output_file'] = args.output_file[0]
+    else:
+        logger.error("No output file")
+        sys.exit(2)
+    if args.data_type:
+        input_data['data_type'] = args.data_type[0]
+    else:
+        logger.error("No data type selected")
+        sys.exit(2)
     return input_data
 
 
@@ -84,15 +94,14 @@ def parse_csv(input_file, data_type):
     logger = logging.getLogger()
     # Blank bibliography
     bibliography = []
-
-    with open(input_file, mode='r') as in_file:
+    logger.debug(input_file)
+    with open(input_file, mode='r', encoding='cp1252') as in_file:
         # Setup reader
-        reader = csv.reader(in_file, csv.excel_tab)
-        # Ignore header
-        reader.next()
+        reader = csv.reader(in_file, delimiter=';')
+        # Skip header
+        reader.__next__()
         # Read lines
         for row in reader:
-            logger.debug(row)
             bib_item = BibItem()
             if data_type == 'ScientificProduction':
                 bib_item.type = row[0]
@@ -319,7 +328,20 @@ class BibItem:
         self.__year = value
 
     def to_ris(self):
-        pass
+        ris_text = list()
+        ris_text.append('TY  - ' + self.type)
+        ris_text.append('AU  - ' + self.authors[0])
+        ris_text.append('TI  - ' + self.title)
+        ris_text.append('YE  - ' + str(self.year))
+
+        if self.type == 'PAT':
+            ris_text.append('')
+        elif self.type == 'THES':
+            ris_text.append('')
+        elif self.type == 'RPRT':
+            ris_text.append('')
+        ris_text.append('RE  - ')
+        return ris_text
 
 
 if __name__ == "__main__":
