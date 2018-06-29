@@ -333,13 +333,18 @@ class BibItem:
         ris_text.append('AU  - ' + self.authors[0])
         ris_text.append('TI  - ' + self.title)
         ris_text.append('YE  - ' + str(self.year))
+        ris_text.append('KW  - ') + '; '.join(self.keywords)
 
         if self.type == 'PAT':
-            ris_text.append('')
+            ris_text.append('IS  - ' + self.number)
+            ris_text.append('PB  - ' + self.institution)
         elif self.type == 'THES':
-            ris_text.append('')
+            ris_text.append('PB  - ' + self.institution)
         elif self.type == 'RPRT':
-            ris_text.append('')
+            ris_text.append('PB  - ' + self.institution)
+        elif self.type == 'CPAPER':
+            ris_text.append('CY  - ' + self.location)
+            ris_text.append('T2  - ' + self.conference_name)
         ris_text.append('RE  - ')
         return ris_text
 
