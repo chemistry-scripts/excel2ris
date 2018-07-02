@@ -33,7 +33,8 @@ def write_ris(output_file, ris_entries):
     """Write all RIS entries to output file"""
     with open(output_file, mode='w', encoding='UTF-8') as out:
         for entry in ris_entries:
-            print(entry)
+            out.write('\n'.join(entry))
+            out.write('\n\n')
     return
 
 
@@ -305,6 +306,12 @@ class BibItem:
         elif value == "Jury/Committee Participation":
             self.__type = "GEN"
             self.__keywords.append("Jury/Committee Participation")
+        elif value == "Conference Organisation":
+            self.__type = "GEN"
+            self.__keywords.append("Conference Organisation")
+        elif value == "Teaching":
+            self.__type = "GEN"
+            self.__keywords.append("Teaching")
         elif value == "Others":
             self.__type = "GEN"
             self.__keywords.append("Others")
@@ -328,12 +335,13 @@ class BibItem:
         self.__year = value
 
     def to_ris(self):
+        logger = logging.getLogger()
         ris_text = list()
         ris_text.append('TY  - ' + self.type)
         ris_text.append('AU  - ' + self.authors[0])
         ris_text.append('TI  - ' + self.title)
         ris_text.append('YE  - ' + str(self.year))
-        ris_text.append('KW  - ') + '; '.join(self.keywords)
+        ris_text.append('KW  - ' + '; '.join(self.keywords))
 
         if self.type == 'PAT':
             ris_text.append('IS  - ' + self.number)
@@ -345,6 +353,18 @@ class BibItem:
         elif self.type == 'CPAPER':
             ris_text.append('CY  - ' + self.location)
             ris_text.append('T2  - ' + self.conference_name)
+        elif self.type == 'MGZN':
+            ris_text.append('UR  - ' + '; '.join(self.keywords))
+        elif self.type == 'GRANT':
+            ris_text.append('PB  - ' + self.institution)
+            ris_text.append('OP  - ' + self.number)
+        elif self.type == 'COMP':
+            ris_text.append('UR  - ' + self.location)
+        elif self.type == 'GEN':
+            ris_text.append('N1  - ' + '; '.join(self.comments))
+        else:
+            logger.error('Unrecognized type: ' + self.type)
+
         ris_text.append('RE  - ')
         return ris_text
 
