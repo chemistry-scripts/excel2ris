@@ -340,7 +340,7 @@ class BibItem:
         ris_text.append('TY  - ' + self.type)
         ris_text.append('AU  - ' + self.authors[0])
         ris_text.append('TI  - ' + self.title)
-        ris_text.append('YE  - ' + str(self.year))
+        ris_text.append('Y1  - ' + str(self.year))
         ris_text.append('KW  - ' + '; '.join(self.keywords))
 
         if self.type == 'PAT':
@@ -365,7 +365,7 @@ class BibItem:
         else:
             logger.error('Unrecognized type: ' + self.type)
 
-        ris_text.append('RE  - ')
+        ris_text.append('ER  - ')
         return ris_text
 
 
